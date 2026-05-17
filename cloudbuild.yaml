@@ -1,18 +1,25 @@
 steps:
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build','-t','asia-south2-docker.pkg.dev/gcp-cicd-demo-409307/pyapprepo-artifact/pyappimage:latest','.']
+  # 1. Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'asia-south2-docker.pkg.dev/gcp-cicd-demo-409307/pyapprepo-artifact/pyappimage:latest', '.']
 
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push','asia-south2-docker.pkg.dev/gcp-cicd-demo-409307/pyapprepo-artifact/pyappimage:latest']
+  # 2. Push to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'asia-south2-docker.pkg.dev/gcp-cicd-demo-409307/pyapprepo-artifact/pyappimage:latest']
 
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: gcloud
-  args:
-  - 'run'
-  - 'deploy'
-  - 'pyflaskapp'
-  - '--image'
-  - 'asia-south2-docker.pkg.dev/gcp-cicd-demo-409307/pyapprepo-artifact/pyappimage:latest'
-  - '--region'
-  - 'asia-south2'
-  - '--allow-unauthenticated'  
+  # 3. Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'pyflaskapp'
+      - '--image'
+      - 'asia-south2-docker.pkg.dev/gcp-cicd-demo-409307/pyapprepo-artifact/pyappimage:latest'
+      - '--region'
+      - 'asia-south2'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
